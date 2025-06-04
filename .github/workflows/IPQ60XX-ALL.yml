@@ -100,6 +100,7 @@ jobs:
     - name: Install Feeds(安装feeds)
       run: |
         cd $OPENWRT_PATH
+        echo "src-git oui https://github.com/zhaojh329/oui.git" >> feeds.conf.default
         ./scripts/feeds update -a
         ./scripts/feeds install -a
   
