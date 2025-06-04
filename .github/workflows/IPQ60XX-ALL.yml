@@ -36,18 +36,34 @@ jobs:
         echo "--------------------------硬盘信息--------------------------"
         echo "硬盘数量：$(ls /dev/sd* | grep -v [1-9] | wc -l)" && df -hT
 
-    - name: Check for existing Node.js
+    - name: Ensure Node.js >= 20.9.0 using nvm
       run: |
+        required_version="20.9.0"
+        latest_version="node"  # alias for latest stable
+        
+        compare_versions() {
+          dpkg --compare-versions "$1" ge "$2"
+        }
+        
         if command -v node > /dev/null; then
-          echo "Using existing Node.js: $(node -v)"
+          current_version=$(node -v | sed 's/v//')
+          echo "Detected Node.js version: $current_version"
+          if compare_versions "$current_version" "$required_version"; then
+            echo "Node.js is already >= $required_version"
+            exit 0
+          else
+            echo "Node.js version is too old, updating to latest"
+          fi
         else
-          echo "Installing Node.js 20.9.0 with nvm"
-          export NVM_DIR="$HOME/.nvm"
-          curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
-          source "$NVM_DIR/nvm.sh"
-          nvm install 20.9.0
-          nvm use 20.9.0
+          echo "Node.js not found, installing latest"
         fi
+        
+        export NVM_DIR="$HOME/.nvm"
+        curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
+        source "$NVM_DIR/nvm.sh"
+        nvm install "$latest_version"
+        nvm use "$latest_version"
+        echo "Using Node.js $(node -v)"
 
 
     - name: Initialization Environment(初始化环境)
