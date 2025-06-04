@@ -109,6 +109,12 @@ jobs:
         echo "VERSION_LOG=暂无更新" >> $GITHUB_ENV
         fi
 
+    - name: Apply DIY Script (Remove LuCI, Add OUI)
+      run: |
+        chmod +x $DIY_SCRIPT
+        cd openwrt
+        ../$DIY_SCRIPT
+
     - name: Generate Variables(生成变量)
       run: |
         cp $CONFIG_FILE $OPENWRT_PATH/.config
@@ -132,7 +138,6 @@ jobs:
     - name: Install Feeds(安装feeds)
       run: |
         cd $OPENWRT_PATH
-        echo "src-git oui https://github.com/zhaojh329/oui.git" >> feeds.conf.default
         ./scripts/feeds update -a
         ./scripts/feeds install -a -p oui
         ./scripts/feeds install -a
