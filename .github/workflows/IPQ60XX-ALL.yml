@@ -36,6 +36,20 @@ jobs:
         echo "--------------------------硬盘信息--------------------------"
         echo "硬盘数量：$(ls /dev/sd* | grep -v [1-9] | wc -l)" && df -hT
 
+    - name: Check for existing Node.js
+      run: |
+        if command -v node > /dev/null; then
+          echo "Using existing Node.js: $(node -v)"
+        else
+          echo "Installing Node.js 20.9.0 with nvm"
+          export NVM_DIR="$HOME/.nvm"
+          curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
+          source "$NVM_DIR/nvm.sh"
+          nvm install 20.9.0
+          nvm use 20.9.0
+        fi
+
+
     - name: Initialization Environment(初始化环境)
       env:
         DEBIAN_FRONTEND: noninteractive
@@ -102,6 +116,7 @@ jobs:
         cd $OPENWRT_PATH
         echo "src-git oui https://github.com/zhaojh329/oui.git" >> feeds.conf.default
         ./scripts/feeds update -a
+        ./scripts/feeds install -a -p oui
         ./scripts/feeds install -a
   
     - name: Load Custom Configuration(加载自定义配置)
