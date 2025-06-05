@@ -140,6 +140,24 @@ jobs:
         cd $OPENWRT_PATH
         ./scripts/feeds update -a
         ./scripts/feeds install -a
+
+    - name: Strip LuCI deps from third-party Makefiles
+      run: |
+        cd "$OPENWRT_PATH"
+
+        echo '[INFO] Removing +luci*, +libluci*, +luci-compat from Makefiles …'
+        # Search both package/ and feeds/ trees for Makefiles that reference LuCI
+        find package feeds -type f -name Makefile -print0 \
+          | xargs -0 grep -lE '\+luci[^ ]*|\+libluci[^ ]*|\+luci-compat' \
+          | while read -r f; do
+              sed -i -E \
+                -e 's/\+luci[^ ]*//g' \
+                -e 's/\+libluci[^ ]*//g' \
+                -e 's/\+luci-compat//g' \
+                "$f"
+              echo "  • patched $f"
+            done
+        echo '[INFO] Done stripping LuCI dependencies.'
   
     - name: Load Custom Configuration(加载自定义配置)
       run: |
